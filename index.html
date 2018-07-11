@@ -12,43 +12,46 @@
 
 class: center, middle, cover
 
-# perf.html
-## a profiler for Firefox
+# Un profileur, comment ça marche ?
+## perf.html: un profileur pour Firefox
 
 ---
 
-# Me
+# Qui suis-je ?
 
 .flex[
 ![Julien](images/me.jpg)
 
 * Julien Wajsberg [@jwajsberg](https://twitter.com/jwajsberg)
-* from Paris
-* at Mozilla for 5 years
-* developer on [perf.html](https://github.com/devtools-html/perf.html/) for 1
-year
+* à Mozilla depuis plus de 5 ans
+* développeur sur [perf.html](https://github.com/devtools-html/perf.html/)
+depuis plus d'un an
 ]
 ---
 
-# What's the plan?
+# De quoi va-t-on parler ?
 
-1. A sampling profiler
-2. Call trees
-3. The timeline
-4. Markers
-5. Analyzing a profile
-
----
-
-# A _sampling_ profiler
-
-* every millisecond we stop Firefox and look at the stack on every thread
-* when we capture we gather all these measurements in one profile
-* then we _merge_ the stacks into a _call tree_
+1. Qu'est-ce qu'un <i>sampling profiler</i> ?
+2. Les arbres d'appels (<i>Call Tree</i>)
+3. La ligne du temps (timeline)
+4. Les markers
+5. Analyser un profile
 
 ---
 
-# An example, maybe?
+# Un _sampling_ profiler
+
+* l'utilisateur démarre le profiler
+* on réalise un échantillonnage: chaque milliseconde on arrête Firefox et on regarde la stack
+courante (sur chaque thread)
+* lorsque l'utilisateur arrête le profiler, on capture l'ensemble ces mesures et
+on les rassemble dans une structure JSON: le profil
+* à partir de ces mesures et toutes ces stacks, on peut créer des
+visualisations, en particulier l'arbre d'appels.
+
+---
+
+# Un petit exemple ?
 
 ```javascript
 function a() {
@@ -72,7 +75,7 @@ a();
 
 ---
 
-# Taking a sample every 1ms:
+# Un échantillon chaque milliseconde
 
 ```
  1ms      2ms      3ms      4ms      5ms      6ms
@@ -88,7 +91,7 @@ doWork   doWork   doWork   doWork   doWork   doWork
 
 ---
 
-# A simple call tree
+# Un arbre d'appels très simple
 
 ```
   a       (Running time: 6ms) (Self time: 0ms)
@@ -101,18 +104,18 @@ doWork    (Running time: 6ms) (Self time: 6ms)
 ```
 
 ---
-# In the profiler
+# Affichage dans perf.html
 
 .center[
 .with-caption[
-![A simple call tree](images/a-simple-call-tree.png)
+![Un arbre d'appels très simple](images/a-simple-call-tree.png)
 ]
 
-[Build a simple call tree, for real](examples/a-simple-call-tree.html)
+[Essayez pour de vrai !](examples/a-simple-call-tree.html)
 ]
 
 ---
-# Another example
+# Un autre exemple ?
 
 ```javascript
 function a() {
@@ -136,7 +139,7 @@ a();
 ```
 
 ---
-# A simpler call tree !
+# Un arbre encore plus simple !
 
 ```
   a       (Running time: 6ms) (Self time: 0ms)
@@ -147,10 +150,11 @@ a();
 ```
 
 ???
-We spend too less time in doNothing, so it never shows up when we stop Firefox
-to get a sample. We might get one by chance sometimes.
+On passe trop peu de temps dans doNothing, donc on ne le voit pas au moment où
+on arrête Firefox pour l'échantillonnage. C'est statistique: on peut en avoir un
+parfois, par chance.
 ---
-# Slightly different
+# Un exemple un peu différent
 
 .smaller[
 ```javascript
@@ -179,7 +183,7 @@ a();
 ]
 
 ---
-# Same call tree as the first example
+# Cette fois, le même arbre qu'au début
 
 ```
   a       (Running time: 6ms) (Self time: 0ms)
@@ -191,11 +195,12 @@ a();
 doWork    (Running time: 6ms) (Self time: 6ms)
 ```
 ???
-This time we spend enough time in doWork. What's important to see is that even
-if we call doWork several times we see it only once in the call tree.
+Cette fois on passe assez de temps dans doWork.
+Un point à remarquer: même si on l'appelle plusieurs fois, on ne le voit qu'une
+fois dans l'arbre.
 
 ---
-# A more complex code
+# Un exemple plus complexe
 
 .smallest[
 ```javascript
@@ -233,108 +238,116 @@ a();
 ]
 
 ---
-# More samples!
+# Plus d'échantillons !
 
 .center[
-![Samples for this example](images/branched-samples.png)
+![Les échantillons pour cet exemple](images/branched-samples.png)
 ]
 
 ???
-Every ms we get a new stack.
+À chaque milliseconde on a une nouvelle stack.
 ---
-# A call tree with branches!
+# Un arbre avec des branches !
 .center[
 .with-caption[
-![A call tree with branches](images/branched-call-tree.png)
+![Un arbre d'appels avec des branches](images/branched-call-tree.png)
 ]
 
-[Do it yourself!](examples/a-branched-call-tree.html)
-]
-
-???
-We merge the functions into a call tree with branches.
-
----
-# In perf.html
-
-.center[
-![Screenshot of perf.html for this profile](images/branched-call-tree-in-perf.png)
+[Essayez par vous-mêmes!](examples/a-branched-call-tree.html)
 ]
 
 ???
-See especially the running times: we clearly see we spend time in `f`.
+On fusionne les fonctions pour créer une visualisation sous forme d'un arbre
+d'appels.
 
 ---
-# Call tree inversion
-## aka Bottom-up view
+# Dans perf.html
 
 .center[
-![Screenshot of perf.html after inverting the profile](images/branched-call-tree-in-perf-inverted.png)
+![Capture de perf.html pour ce profil](images/branched-call-tree-in-perf.png)
 ]
 
 ???
-Inverting the call tree makes it easier to see the functions where we spend the
-most time.
+Regardez particulièrement les "Running times": on passe clairement du temps dans `f`.
 
 ---
-# The timeline
+# Inversion de l'arbre d'appels
+## aussi appelé "Vue Bottom-up"
 
 .center[
-![Timeline in a profile](images/timeline.png)
+![Capture de perf.html après inversion](images/branched-call-tree-in-perf-inverted.png)
 ]
 
-* This actually shows the stack.
-* Changes in the height mean _changes in the stack_.
-* This is _not_ the CPU usage.
+???
+Inverser l'arbre permet de mettre en évidence les fonctions où on passe le plus
+de temps.
 
 ---
-# Markers
+# La timeline
 
-* Because we control Gecko's source code, we can _instrument_ it at all the
-right places
-* Just like developers can _instrument_ their own code with `performance.mark`.
+.center[
+![Timeline dans un profile](images/timeline.png)
+]
 
-.center[![React markers](images/markers.png)]
-
----
-# Markers and call trees
-
-* markers are supplementary to the call tree
-* we'll always get all markers
-* markers for important events: reflows, garbage collection, DOMEvent
-* we generate special markers for when the event loop is stuck
+* Cela montre en fait les stacks.
+* Un changement de hauteur signifie qu'il y a eu des changements dans la stack.
+* Cela n'est _pas_ l'utilisation CPU.
 
 ---
-# How do _you_ use it?
+# Les markers
+
+* Puisqu'on contrôle le code de Gecko, on peut l'_instrumenter_ aux bons
+endroits.
+* Et les développeurs JS peuvent aussi _instrumenter_ leur code avec
+`performance.mark`.
+
+.center[![Marqueurs React](images/markers.png)]
+
+---
+# Les markers et l'arbre d'appels
+
+* ils sont complémentaires
+* on a toujours tous les marqueurs (alors que l'arbre se base sur des
+échantillons statistiques)
+* on a des marqueurs pour les événements importants: reflows, garbage
+collection, événements DOM...
+* on a aussi un marqueur spécial pour quand la boucle d'événement est bloquée
+
+---
+# Comment faire pour l'utiliser ?
 .smaller[
 ## Solution 1
-1. Go to https://perf-html.io
-2. Install the addon
-3. Record from the added icon.
+1. Allez sur https://perf-html.io
+2. Installez l'extension proposée
+3. Enregistrez à partir de la nouvelle icône
 
 ## Solution 2
-1. Enable the new performance recorder in the Developer Tools' settings
-2. Open the _Performance_ panel in the developer tools.
-3. Record from the panel.
+1. Activez le nouveau panneau de performance depuis les paramètres des DevTools
+2. Open the panneau _Performance_ des DevTools.
+3. Contrôlez l'enregistrement depuis ce panneau.
 ]
----
-# Some more analyses
 
-* [DOM mutations](examples/dom-mutation.html)
+???
+La solution 2 souffre encore de l'overhead provoqué par les autres outils, mais
+c'est la seule solution pour pouvoir profiler sur mobile.
+
+---
+# D'autres analyses
+
+* [mutations DOM](examples/dom-mutation.html)
 * [Garbage collection](examples/merge-sort.html)
 
 ---
-# Thank you !
+# Merci
 
-_INSERT FUNNY ANIMATED GIF HERE_
+Vous pouvez toujours trouver cette présentation [en ligne sur github](https://github.com/julienw/webperf-meetup-2018-perf-html-talk) et même
+[la lire en ligne](https://julienw.github.io/webperf-meetup-2018-perf-html-talk/)
 
-You can always find this presentation [online on github](https://github.com/julienw/fosdem-2018-perf-html-talk/)
-and even [watch it online](https://julienw.github.io/fosdem-2018-perf-html-talk/).
+Merci à tous mes collègues [Greg](https://twitter.com/TatumCreative/),
+[Markus](https://twitter.com/markusstange), [Ola](https://twitter.com/misprintedtype/),
+[Nazim](https://twitter.com/canaltinova) et j'en passe.
 
-Thanks to my wonderful coworkers [Greg Tatum](https://twitter.com/TatumCreative/) and
-[Markus Stange](https://twitter.com/markusstange).
-
-_QUESTIONS?_
+_QUESTIONS ?_
     </textarea>
     <script src="./lib/remark.js">
     </script>
