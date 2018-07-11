@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>perf.html: a profiler for Firefox</title>
+    <title>Un profileur, comment ça marche ?</title>
     <meta charset="utf-8">
     <link rel='stylesheet' href='fonts/zilla/zilla.css' />
     <link rel='stylesheet' href='fonts/fira/fira.css' />
@@ -33,9 +33,8 @@ depuis plus d'un an
 
 1. Qu'est-ce qu'un <i>sampling profiler</i> ?
 2. Les arbres d'appels (<i>Call Tree</i>)
-3. La ligne du temps (timeline)
-4. Les markers
-5. Analyser un profile
+3. Les markers
+4. Analyser un profile
 
 ---
 
@@ -335,34 +334,52 @@ Regardez particulièrement les "Running times": on passe clairement du temps dan
 # Inversion de l'arbre d'appels
 ## aussi appelé "Vue Bottom-up"
 
+.with-caption[
 .center[
 ![Capture de perf.html après inversion](images/branched-call-tree-in-perf-inverted.png)
+]
+[Consulter ce profil en ligne](https://perfht.ml/2Jf40XV)
 ]
 
 ???
 Inverser l'arbre permet de mettre en évidence les fonctions où on passe le plus
 de temps.
 
+
 ---
-# La timeline
+# Une autre visualisation: le flame graph
 
 .center[
-![Timeline dans un profile](images/timeline.png)
+![Le Flame Graph](images/flame-graph.png)
 ]
 
-* Cela montre en fait les stacks.
-* Un changement de hauteur signifie qu'il y a eu des changements dans la stack.
-* Cela n'est _pas_ l'utilisation CPU.
+---
+# Chrome aussi a son flame graph
+
+
+.center[
+![Le Flame Graph de chrome](images/flame-graph-chrome.png)
+]
 
 ---
 # Les markers
 
+.smaller[
 * Puisqu'on contrôle le code de Gecko, on peut l'_instrumenter_ aux bons
 endroits.
 * Et les développeurs JS peuvent aussi _instrumenter_ leur code avec
 `performance.mark`.
+]
+.center[.with-caption[
+![Marqueurs React](images/markers.png)
+[Voir ce profil en ligne](https://perfht.ml/2LbZxXN)
+]
+]
 
-.center[![Marqueurs React](images/markers.png)]
+---
+# Dans Chrome aussi
+
+.center[![Marqueurs React dans Chrome](images/markers-chrome.png)]
 
 ---
 # Les markers et l'arbre d'appels
@@ -375,14 +392,16 @@ collection, événements DOM...
 * on a aussi un marqueur spécial pour quand la boucle d'événement est bloquée
 
 ---
-# Comment faire pour l'utiliser ?
+# Utiliser le Gecko Profiler
+## un peu de pub...
+
 .smaller[
-## Solution 1
+### Solution 1
 1. Allez sur https://perf-html.io
 2. Installez l'extension proposée
 3. Enregistrez à partir de la nouvelle icône
 
-## Solution 2
+### Solution 2
 1. Activez le nouveau panneau de performance depuis les paramètres des DevTools
 2. Open the panneau _Performance_ des DevTools.
 3. Contrôlez l'enregistrement depuis ce panneau.
