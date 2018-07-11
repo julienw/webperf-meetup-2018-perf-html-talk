@@ -223,7 +223,7 @@ function e() {
 }
 
 function f() {
-* for (let i = 0; i < 1e7; i += Math.random()) {}
+  for (let i = 0; i < 1e7; i += Math.random()) {}
   g();
 }
 
@@ -253,13 +253,74 @@ a();
 ![Un arbre d'appels avec des branches](images/branched-call-tree.png)
 ]
 
-[Essayez par vous-mêmes!](examples/a-branched-call-tree.html)
+[Essayez par vous-mêmes !](examples/a-branched-call-tree.html)
 ]
 
 ???
 On fusionne les fonctions pour créer une visualisation sous forme d'un arbre
 d'appels.
 
+---
+# Regardons cet exemple de plus près
+
+.smallest[
+```javascript
+function a() { b(); }
+
+function b() {
+  c();
+  h();
+}
+
+function c() {
+  d();
+  f();
+}
+
+function d() { e(); }
+
+function e() {
+  for (let i = 0; i < 1e7; i += Math.random()) {}
+}
+
+function f() {
+* for (let i = 0; i < 1e7; i += Math.random()) {}
+  g();
+}
+
+function g() {
+  for (let i = 0; i < 1e7; i += Math.random()) {}
+}
+
+function h() { f(); }
+
+a();
+```
+]
+
+---
+# On passe du temps dans `f`
+.center[
+![f est au bout d'une stack](images/branched-samples-with-selftime.png)
+]
+
+---
+# Le résultat en terme de timings
+
+```
+  a (5ms / 0ms)
+  ↓
+  b (5ms / 0ms)
+  ↓----------------------------------
+  ↓                                 ↓
+  c (3ms / 0ms)                     h (2ms / 0ms)
+  ↓-----------------                ↓
+  ↓                ↓                ↓
+  d (1ms / 0ms)    f (2ms / 1ms)    f (2ms / 1ms)
+  ↓                ↓                ↓
+  ↓                ↓                ↓
+  e (1ms / 1ms)    g (1ms / 1ms)    g (1ms / 1ms)
+```
 ---
 # Dans perf.html
 
